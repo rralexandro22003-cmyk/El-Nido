@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Cine en Casa</title>
     <style>
-        /* --- ESTILOS GENERALES (Sin cambios) --- */
+        /* --- ESTILOS GENERALES --- */
         :root {
             --primary-color: #e50914;
             --dark-bg: #141414;
@@ -159,7 +159,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
+            background-color: rgba(0, 0, 0, 0.95);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -167,7 +167,7 @@
 
         .video-container {
             width: 90%;
-            max-width: 900px;
+            max-width: 1000px;
             position: relative;
         }
 
@@ -189,20 +189,36 @@
 
         .close-video {
             position: absolute;
-            top: -40px;
+            top: -50px;
             right: 0;
             color: white;
-            font-size: 30px;
+            font-size: 35px;
             cursor: pointer;
             background: none;
             border: none;
             padding: 0;
+            transition: color 0.3s ease;
         }
 
         .close-video:hover {
             color: var(--primary-color);
         }
 
+        .video-info-modal {
+            margin-top: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .video-info-modal h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.5rem;
+        }
+
+        .video-info-modal p {
+            margin: 0;
+            color: #b3b3b3;
+        }
     </style>
 </head>
 <body>
@@ -240,7 +256,7 @@
                     <div class="video-info">
                         <h3 class="video-title">Título de tu Video 2</h3>
                         <p class="video-description">Esta es otra película que te encantará.</p>
-                    </div>
+                   </div>
                 </div>
 
             </div>
@@ -258,6 +274,10 @@
             <div class="video-player">
                 <iframe id="videoFrame" allowfullscreen></iframe>
             </div>
+            <div class="video-info-modal" id="videoInfoModal">
+                <h3 id="modalVideoTitle">Título del video</h3>
+                <p id="modalVideoDescription">Descripción del video</p>
+            </div>
         </div>
     </div>
 
@@ -269,6 +289,8 @@
             const videoModal = document.getElementById('videoModal');
             const videoFrame = document.getElementById('videoFrame');
             const closeVideo = document.getElementById('closeVideo');
+            const modalVideoTitle = document.getElementById('modalVideoTitle');
+            const modalVideoDescription = document.getElementById('modalVideoDescription');
 
             videoCards.forEach(card => {
                 card.addEventListener('click', function(event) {
@@ -277,13 +299,19 @@
 
                     // Obtiene el ID del video desde el atributo 'data-video-id'
                     const videoId = this.getAttribute('data-video-id');
+                    const videoTitle = this.querySelector('.video-title').textContent;
+                    const videoDescription = this.querySelector('.video-description').textContent;
                     
                     if (videoId) {
-                        // Construye la URL del embed de YouTube
-                        const embedUrl = `https://www.youtube.com/embed/\${videoId}?autoplay=1&rel=0`;
+                        // Construye la URL del embed de YouTube con parámetros adicionales para evitar errores
+                        const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&showinfo=0&modestbranding=1&fs=1&cc_load_policy=1&hl=es&origin=${window.location.hostname}`;
                         
                         // Establece la URL en el iframe
                         videoFrame.src = embedUrl;
+                        
+                        // Actualiza la información del modal
+                        modalVideoTitle.textContent = videoTitle;
+                        modalVideoDescription.textContent = videoDescription;
                         
                         // Muestra el modal
                         videoModal.style.display = 'flex';
@@ -292,7 +320,7 @@
                         document.body.style.overflow = 'hidden';
                     }
                 });
-});
+            });
 
             // Función para cerrar el modal
             function closeModal() {
@@ -318,6 +346,18 @@
                 if (event.key === 'Escape' && videoModal.style.display === 'flex') {
                     closeModal();
                 }
+            });
+
+            // Manejo de errores del iframe de YouTube
+            videoFrame.addEventListener('error', function() {
+                // Si hay un error, muestra un mensaje
+                videoFrame.style.display = 'none';
+                const errorMessage = document.createElement('div');
+                errorMessage.style.color = 'white';
+                errorMessage.style.textAlign = 'center';
+                errorMessage.style.padding = '20px';
+                errorMessage.textContent = 'No se pudo cargar el video. Por favor, inténtalo de nuevo más tarde.';
+                videoFrame.parentNode.appendChild(errorMessage);
             });
         });
     </script>
